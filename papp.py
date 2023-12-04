@@ -13,7 +13,7 @@ app = Flask(__name__)
 # this is the main page, which will just show the html gui
 @app.route('/')
 def default():
-    pass
+    return ""
     
 # this is the endpoint for the API, it gets a json file of the data from the html page and sets all the data from the 'button' key to a variable
 # then, it checks what that button data is, calls the appropriate function, and adds that movement to the log dictionary
