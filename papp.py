@@ -1,20 +1,43 @@
 # import all necessary libraries
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from tankClass import Tank
-import pickle
-import time
+import cv2
+
 
 # create the tank object
 tank = Tank()
 
 # create the flask server
 app = Flask(__name__)
+camera = cv2.VideoCapture(0)
+
+
+def generate_frames():
+    while True:
+
+        ## read the camera frame
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
 
 # this is the main page, which will just show the html gui
 @app.route('/')
 def default():
-    return ""
-    
+    return render_template('indexvid.html')
+
+
+@app.route("/video", methods=['POST'])
+def video():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 # this is the endpoint for the API, it gets a json file of the data from the html page and sets all the data from the 'button' key to a variable
 # then, it checks what that button data is, calls the appropriate function, and adds that movement to the log dictionary
 @app.route('/moving', methods=['POST'])
