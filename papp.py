@@ -21,7 +21,9 @@ def default():
 def moved():
     data = request.json
     pressed = data.get('button')
-    if pressed == "forward" or pressed == "go":
+    if pressed == "forward":
+        tank.forward()
+    elif pressed == "go":
         tank.forward()
     elif pressed == "stop":
         tank.stop()
