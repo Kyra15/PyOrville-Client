@@ -1,7 +1,7 @@
 # import all necessary libraries
 from flask import Flask, render_template, request, Response
 from tankClass import Tank
-import cv2
+#import cv2
 
 
 # create the tank object
@@ -12,19 +12,19 @@ app = Flask(__name__)
 camera = cv2.VideoCapture(0)
 
 
-def generate_frames():
-    while True:
+# def generate_frames():
+#     while True:
 
-        ## read the camera frame
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
+#         ## read the camera frame
+#         success, frame = camera.read()
+#         if not success:
+#             break
+#         else:
+#             ret, buffer = cv2.imencode('.jpg', frame)
+#             frame = buffer.tobytes()
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+#         yield (b'--frame\r\n'
+#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 # this is the main page, which will just show the html gui
