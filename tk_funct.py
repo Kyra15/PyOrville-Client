@@ -148,12 +148,13 @@ def LoginWindow(root):
     login_wind.mainloop()
 
 
+# logs user out by closing the main window and writes the action in the log
 def logging_out(tank_wind, root, username):
   Aeturn(tank_wind, root, username)
   logging_movement (username, 'logout')
                 
 
-
+# window that contains full log from most recent to oldest
 def LogDataWind(tank_wind):
   rev = ""
   ld_wind = Toplevel(tank_wind)
@@ -167,7 +168,8 @@ def LogDataWind(tank_wind):
   logtextbox.grid(row = 5, column=1)
   ld_wind.mainloop()
   # returnbutton = Button(ld_wind, text='Close Log', command=lamda: )
-  
+
+# writes things to the current logged in user's file
 def logging_create(username):
   try:
       tdytime = datetime.datetime.now()
@@ -189,6 +191,7 @@ def logging_create(username):
   except Exception as e:
     print(f"An error occurred: {e}")
 
+# sends all actions to the current logged in user's log
 def all_log(username, direction, thingy):
   if thingy == 'loggingin':
     tdytime = datetime.datetime.now()
@@ -209,7 +212,7 @@ def all_log(username, direction, thingy):
   elif thingy == 'movement':
     logging_movement(username, direction)
     
-
+# this function writes and formats the log messages for the movement and the logging out functions
 def logging_movement(username, direction):
   tdytime = datetime.datetime.now()
   tdy = tdytime.strftime("%x")
@@ -218,16 +221,10 @@ def logging_movement(username, direction):
   tdy = tdy.replace(":", "_").replace("/", "_")
   timet = timet.replace(":", "_").replace("/", "_")
   f = open(f"{username}-{tdy}-{timet}.txt", "a")
-  if direction == 'forward':
-    writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
-  elif direction == 'backward':
-    writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
-  elif direction == 'left':
-    writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
-  elif direction == 'right':
+  if direction == 'forward' or direction == 'backward' or direction == 'left' or direction == 'right':
     writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
   elif direction == 'go':
-    writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
+    writestr = f"\n{username} played the demo on {tdy} at {timet}"
   elif direction == 'stop':
     writestr = f"\n{username} stopped the robot on {tdy} at {timet}"
   elif direction == 'logout':
