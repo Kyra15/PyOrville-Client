@@ -4,13 +4,13 @@ from cryptography.fernet import Fernet
 import datetime
 from tkinter import messagebox
 
-#
 
 # open file that contains the encryption and decryption key
 with open("fernet_key.key", "rb") as key_file:
     key = key_file.read()
 fernet = Fernet(key)
 
+# creates a date object using the datetime module and sets the date and time to the variables tdy and timet
 tdytime = datetime.datetime.now()
 tdy = tdytime.strftime("%x")
 timet = tdytime.strftime("%X")
