@@ -4,16 +4,12 @@ from cryptography.fernet import Fernet
 import datetime
 from tkinter import messagebox
 
+#
 
 # open file that contains the encryption and decryption key
 with open("fernet_key.key", "rb") as key_file:
     key = key_file.read()
 fernet = Fernet(key)
-
-# creates a date object using the datetime module and sets the date and time to the variables tdy and timet
-tdytime = datetime.datetime.now()
-tdy = tdytime.strftime("%x")
-timet = tdytime.strftime("%X")
 
 # connect to SQL database
 conn = sqlite3.connect('tank_database')
@@ -63,11 +59,11 @@ def create_acc(username, password, firstname, lastname):
         ''', (username, enc_password, firstname, lastname))
         conn.commit()
         print('You have created an account')
-        
         return True
 
 
-# logs the user into the Tank GUI if the username and password #entered match an acount in the database
+# logs the user into the Tank GUI if the username and password
+# entered match an account in the database
 def login(username, password):
     c.execute('''SELECT password FROM tank_database WHERE username = ?''', (username,))
     existing_user = c.fetchone()
@@ -84,7 +80,6 @@ def login(username, password):
                 c.execute('''SELECT firstname FROM tank_database WHERE username = ?''', (username,))
                 use = c.fetchone()
                 name = use[0]
-                
                 return True, name
 
             else:
@@ -92,5 +87,3 @@ def login(username, password):
                 return False, 'nope'
         except Exception as e:
             print(f'The error was: {e}')
-
-
