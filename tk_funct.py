@@ -2,6 +2,15 @@
 from tkinter import *
 from login import *
 import requests
+import datetime
+
+
+tdytime = datetime.datetime.now()
+tdy = tdytime.strftime("%x")
+timet = tdytime.strftime("%X")
+tdy = tdy.replace("/", "-")
+timet = timet.replace(":", "-")
+datething = f"-{tdy}-{timet}.txt"
 
 
 # creates the root tkinter window with options to Create Account, #Login, or Quit
@@ -14,32 +23,31 @@ def create_root():
     log.grid(row=1, column=7)
     out = Button(root, text='Quit', command=root.destroy)
     out.grid(row=3, column=7)
-    
     root.mainloop()
 
 
 # returns whatever window is inputted back to the root window
-def Aeturn(login_wind, root, username=None):
-  login_wind.destroy()
-  root.deiconify()
+def return_wind(login_wind, root, user):
+    login_wind.destroy()
+    root.deiconify()
+
+def logout_wind(login_wind, root, user):
+    updateLog(user, "logout")
+    login_wind.destroy()
+    root.deiconify()
 
 
-# if an account is created succesfully, returns to the root window
+# if an account is created successfully, returns to the root window
 def check_create_acc(user, pword, fname, lname, create_wind, root):
-    logging_create(user)
     if create_acc(user, pword, fname, lname):
-        Aeturn(create_wind, root)
-      
-
-def postDataMove(direct, user):
-  
-  url = "http://192.168.1.42:4200/moving"
-  data = {'button': direct}
-  r = requests.post(url, json=data)
-  logging_movement(user, direct)
+        updateLog(user, "create")
+        create_wind.destroy()
+        root.deiconify()
 
 
-# creates a window where users can enter all of the parameters #required to create an account and where users can create the #account
+# creates a window where users can enter all the
+# parameters #required to create an account and
+# where users can create the account
 def create_window(root):
     create_wind = Toplevel(root)
     root.withdraw()
@@ -65,60 +73,81 @@ def create_window(root):
     fnament.grid(row=2, column=1)
     lnament = Entry(create_wind, textvariable=e4, bg="light gray", fg="black")
     lnament.grid(row=3, column=1)
-    enterbutton = Button(create_wind, text='Create', command=lambda: check_create_acc(userent.get(), pwordent.get(), fnament.get(), lnament.get(), create_wind, root))
+    enterbutton = Button(create_wind, text='Create', command=lambda: check_create_acc(userent.get(),
+                        pwordent.get(), fnament.get(), lnament.get(), create_wind, root))
     enterbutton.grid(row=7, column=0)
-    backbutton = Button(create_wind, text='Back', command=lambda: Aeturn(create_wind, root))
+    backbutton = Button(create_wind, text='Back', command=lambda: return_wind(create_wind, root, user))
     backbutton.grid(row=7, column=1)
     create_wind.mainloop()
 
 
+def updateLog(username, action, extra=None):
+    username_safe = username.replace(":", "_")
+    username_safe = username_safe.replace("/", "_")
+    datething_user = str(username_safe + datething)
+    writestr = ""
+    if action == "move":
+        writestr = f"\n{username} moved the robot {extra} on {tdy} at {timet}"
+    elif action == "create":
+        writestr = f'\n{username} created an account on {tdy} at {timet}'
+    elif action == "login":
+        writestr = f'\n{username} logged into their account on {tdy} at {timet}'
+    elif action == "logout":
+        writestr = f'\n{username} logged out of their account on {tdy} at {timet}'
+    with open(datething_user, "a") as file:
+        file.write(writestr)
+    with open(datething_user, "r") as f:
+        update_gui_log(f.readlines(), canvas, tank_wind)
+
 
 # if a user logs in successfully, creates the Tank GUI window with,
-# #at the moment, a welcome statement and logout button
+# at the moment, a welcome statement and logout button
 def check_logged_in(user, password, login_wind, root):
-  
-  rev = ""
-  valid, name = login(user, password)
-  if valid:
-    tank_wind = Toplevel(login_wind)
-    login_wind.withdraw()
-    tank_wind.title('Tank Interface')
-
-    tank_wind.geometry('500x500')
-    canvas = Canvas(tank_wind, bg='white', height=500, width=500)
-    canvas.pack()
-    canvas.create_line(250, 0, 250, 500, fill='black')
-    canvas.create_line(0, 250, 500, 250, fill='black')
-    welcome = Label(tank_wind, text=f'Welcome {name.title()}')
-    logout = Button(tank_wind, text='Logout', command=lambda: logging_out(tank_wind, root, user))
-    with open("log.txt", "rt") as f:
-      logtext = f.readlines()
-    for line in reversed(logtext):
-      rev += f"{line}\n"
-    logtextbox = Label(tank_wind, text=rev)
-    viewlog = Button(tank_wind,text = 'View Full Log', command=lambda: LogDataWind(tank_wind))
-    forward = Button(tank_wind, text=u'\u2191', command=lambda: postDataMove("forward", user))
-    backward = Button(tank_wind, text=u'\u2193', command=lambda: postDataMove("backward", user))
-    right = Button(tank_wind, text=u'\u2192', command=lambda: postDataMove("right", user))
-    left = Button(tank_wind, text=u'\u2190', command=lambda: postDataMove("left", user))
-    play = Button(tank_wind, text=u'\u25B6', command=lambda: postDataMove("go", user))
-    stop = Button(tank_wind, text=u'\u2587', command=lambda: postDataMove("stop", user))
-    #log_data = Button(tank_wind, text='View Full Log', command=lambda: postData("stop", user))
-    tank_wind.bind('<Up>', lambda:postDataMove('forward',user))
-    tank_wind.bind('<Down>', lambda:postDataMove('backward',user))
-    tank_wind.bind('<Left>',lambda:postDataMove('left',user))
-    tank_wind.bind('<Right>',lambda:postDataMove('right',user))
-    canvas.create_window(250, 20, window=welcome)
-    canvas.create_window(400, 20, window=logout)
-    canvas.create_window(370, 300, window=logtextbox)
-    canvas.create_window(370, 100, window=forward)
-    canvas.create_window(370, 200, window=backward)
-    canvas.create_window(440, 150, window=right)
-    canvas.create_window(300, 150, window=left)
-    canvas.create_window(350, 150, window=play)
-    canvas.create_window(390, 150, window=stop)
-    canvas.create_window(400, 400, window=viewlog)
-    tank_wind.mainloop()
+    try:
+        valid, name = login(user, password)
+    except TypeError:
+        valid, name = False, "nope"
+    if valid:
+        global tank_wind
+        tank_wind = Toplevel(login_wind)
+        login_wind.withdraw()
+        tank_wind.title('Tank Interface')
+        tank_wind.geometry('500x500')
+        global canvas
+        canvas = Canvas(tank_wind, bg='white', height=500, width=500)
+        updateLog(user, "login")
+        canvas.pack()
+        canvas.create_line(250, 0, 250, 500, fill='black')
+        canvas.create_line(0, 250, 500, 250, fill='black')
+        welcome = Label(tank_wind, text=f'Welcome {name.title()}')
+        logout = Button(tank_wind, text='Logout', command=lambda: logout_wind(tank_wind, root, user))
+        rev = ""
+        username_safe = user.replace(":", "_")
+        username_safe = username_safe.replace("/", "_")
+        datething_user = str(username_safe + datething)
+        with open(datething_user, "rt") as f:
+            logtext = f.readlines()
+        for line in reversed(logtext):
+            rev += f"{line}\n"
+        logtextbox = Label(tank_wind, text=rev)
+        viewlog = Button(tank_wind, text='View Full Log', command=lambda: LogDataWind(tank_wind, user))
+        forward = Button(tank_wind, text=u'\u2191', command=lambda: postData("forward", user))
+        backward = Button(tank_wind, text=u'\u2193', command=lambda: postData("backward", user))
+        right = Button(tank_wind, text=u'\u2192', command=lambda: postData("right", user))
+        left = Button(tank_wind, text=u'\u2190', command=lambda: postData("left", user))
+        play = Button(tank_wind, text=u'\u25B6', command=lambda: postData("go", user))
+        stop = Button(tank_wind, text=u'\u2587', command=lambda: postData("stop", user))
+        canvas.create_window(250, 20, window=welcome)
+        canvas.create_window(400, 20, window=logout)
+        canvas.create_window(250, 300, window=logtextbox)
+        canvas.create_window(370, 100, window=forward)
+        canvas.create_window(370, 200, window=backward)
+        canvas.create_window(440, 150, window=right)
+        canvas.create_window(300, 150, window=left)
+        canvas.create_window(350, 150, window=play)
+        canvas.create_window(390, 150, window=stop)
+        canvas.create_window(400, 400, window=viewlog)
+        tank_wind.mainloop()
 
 
 # creates a window where the user can log into the Tank GUI,
@@ -126,7 +155,6 @@ def check_logged_in(user, password, login_wind, root):
 def LoginWindow(root):
     login_wind = Toplevel(root)
     root.withdraw()
-
     login_wind.title('Login')
     login_wind.geometry('500x500')
     user = Label(login_wind, text='Enter your username: ')
@@ -143,90 +171,35 @@ def LoginWindow(root):
     enterbutton = Button(login_wind, text='Login',
                          command=lambda: check_logged_in(userent.get(), pwordent.get(), login_wind, root))
     enterbutton.grid(row=5, column=0)
-    backbutton = Button(login_wind, text='Back', command=lambda: Aeturn(login_wind, root))
+    backbutton = Button(login_wind, text='Back', command=lambda: return_wind(login_wind, root, user))
     backbutton.grid(row=5, column=1)
     login_wind.mainloop()
 
+def LogDataWind(tank_wind, user):
+    rev = ""
+    ld_wind = Toplevel(tank_wind)
+    ld_wind.title('Log Data')
+    ld_wind.geometry('500x500')
+    username_safe = user.replace(":", "_").replace("/", "_")
+    datething_user = str(username_safe + datething)
+    with open(datething_user, "r") as f:
+        logtext = f.readlines()
+    for line in reversed(logtext):
+        rev += f"{line}\n"
+    logtextbox = Label(ld_wind, text=rev)
+    logtextbox.grid(row=5, column=1)
+    ld_wind.mainloop()
 
-# logs user out by closing the main window and writes the action in the log
-def logging_out(tank_wind, root, username):
-  Aeturn(tank_wind, root, username)
-  logging_movement (username, 'logout')
-                
+def postData(direct, user):
+    url = "http://127.0.0.1:4200/"
+    data = {'button': direct}
+    r = requests.post(url, json=data)
+    updateLog(user, "move", direct)
 
-# window that contains full log from most recent to oldest
-def LogDataWind(tank_wind):
-  rev = ""
-  ld_wind = Toplevel(tank_wind)
-  ld_wind.title('Log Data')
-  ld_wind.geometry('500x500')
-  with open("log.txt", "rt") as f:
-    logtext = f.readlines()
-  for line in reversed(logtext):
-    rev += f"{line}\n"
-  logtextbox = Label(ld_wind, text=rev)
-  logtextbox.grid(row = 5, column=1)
-  ld_wind.mainloop()
-  # returnbutton = Button(ld_wind, text='Close Log', command=lamda: )
 
-# writes things to the current logged in user's file
-def logging_create(username):
-  try:
-      tdytime = datetime.datetime.now()
-      tdy = tdytime.strftime("%x")
-      timet = tdytime.strftime("%X")
-
-      # Replace invalid characters in the filename
-      username_safe = username.replace(":", "_").replace("/", "_")
-      tdy = tdy.replace(":", "_").replace("/", "_")
-      timet = timet.replace(":", "_").replace("/", "_")
-
-      fileName = f"{username_safe}-{tdy}-{timet}.txt"
-
-      writestr = f"\n{username} created an account on {tdy} at {timet}"
-
-      with open(fileName, "w") as f:
-          f.write(writestr)
-
-  except Exception as e:
-    print(f"An error occurred: {e}")
-
-# sends all actions to the current logged in user's log
-def all_log(username, direction, thingy):
-  if thingy == 'loggingin':
-    tdytime = datetime.datetime.now()
-    tdy = tdytime.strftime("%x")
-    timet = tdytime.strftime("%X")
-    
-    file_time = timet
-   
-    file_tdy = tdy
-
-    username_safe = username.replace(":", "_").replace("/", "_")
-    tdy = tdy.replace(":", "_").replace("/", "_")
-    timet = timet.replace(":", "_").replace("/", "_")
-    
-    f = open(f"{username}-{tdy}-{timet}.txt", "a")
-    writestr = f'\n{username} logged into their account'
-    f.write(writestr)
-  elif thingy == 'movement':
-    logging_movement(username, direction)
-    
-# this function writes and formats the log messages for the movement and the logging out functions
-def logging_movement(username, direction):
-  tdytime = datetime.datetime.now()
-  tdy = tdytime.strftime("%x")
-  timet = tdytime.strftime("%X")
-  username_safe = username.replace(":", "_").replace("/", "_")
-  tdy = tdy.replace(":", "_").replace("/", "_")
-  timet = timet.replace(":", "_").replace("/", "_")
-  f = open(f"{username}-{tdy}-{timet}.txt", "a")
-  if direction == 'forward' or direction == 'backward' or direction == 'left' or direction == 'right':
-    writestr = f"\n{username} moved the robot {direction} on {tdy} at {timet}"
-  elif direction == 'go':
-    writestr = f"\n{username} played the demo on {tdy} at {timet}"
-  elif direction == 'stop':
-    writestr = f"\n{username} stopped the robot on {tdy} at {timet}"
-  elif direction == 'logout':
-    writestr = f"\n{username} logged out on {tdy} at {timet}"
-  f.write(writestr)
+def update_gui_log(logtext, canvas, wind):
+    rev = ""
+    for line in reversed(logtext):
+        rev += f"{line}\n"
+    logtextbox = Label(wind, text=rev)
+    canvas.create_window(250, 300, window=logtextbox)
