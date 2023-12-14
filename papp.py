@@ -30,7 +30,7 @@ app = Flask(__name__)
 # this is the main page, which will just show the html gui
 @app.route('/')
 def default():
-    return render_template('indexvid.html')
+    return "default"
 
 
 # @app.route("/video", methods=['POST'])
