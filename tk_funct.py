@@ -191,7 +191,7 @@ def LogDataWind(tank_wind, user):
     ld_wind.mainloop()
 
 def postData(direct, user):
-    url = "http://127.0.0.1:4200/"
+    url = "http://192.168.1.42:4200/"
     data = {'button': direct}
     r = requests.post(url, json=data)
     updateLog(user, "move", direct)
