@@ -4,7 +4,7 @@ from login import *
 import requests
 import datetime
 
-
+# create global time and format it
 tdytime = datetime.datetime.now()
 tdy = tdytime.strftime("%x")
 timet = tdytime.strftime("%X")
@@ -80,7 +80,7 @@ def create_window(root):
     backbutton.grid(row=7, column=1)
     create_wind.mainloop()
 
-
+#update the log file depending on the action given and update the gui's text box
 def updateLog(username, action, extra=None):
     username_safe = username.replace(":", "_")
     username_safe = username_safe.replace("/", "_")
@@ -96,8 +96,8 @@ def updateLog(username, action, extra=None):
         writestr = f'\n{username} logged out of their account on {tdy} at {timet}'
     with open(datething_user, "a") as file:
         file.write(writestr)
-    with open(datething_user, "r") as f:
-        update_gui_log(f.readlines(), canvas, tank_wind)
+    # with open(datething_user, "r") as f:
+    #     update_gui_log(f.readlines(), canvas, tank_wind)
 
 
 # if a user logs in successfully, creates the Tank GUI window with,
@@ -175,6 +175,7 @@ def LoginWindow(root):
     backbutton.grid(row=5, column=1)
     login_wind.mainloop()
 
+#display full log
 def LogDataWind(tank_wind, user):
     rev = ""
     ld_wind = Toplevel(tank_wind)
@@ -190,6 +191,7 @@ def LogDataWind(tank_wind, user):
     logtextbox.grid(row=5, column=1)
     ld_wind.mainloop()
 
+# post http request with direction under key called button to a webserver
 def postData(direct, user):
     url = "http://192.168.1.42:4200/"
     data = {'button': direct}
@@ -197,9 +199,9 @@ def postData(direct, user):
     updateLog(user, "move", direct)
 
 
-def update_gui_log(logtext, canvas, wind):
-    rev = ""
-    for line in reversed(logtext):
-        rev += f"{line}\n"
-    logtextbox = Label(wind, text=rev)
-    canvas.create_window(250, 300, window=logtextbox)
+# def update_gui_log(logtext, canvas, wind):
+#     rev = ""
+#     for line in reversed(logtext):
+#         rev += f"{line}\n"
+#     logtextbox = Label(wind, text=rev)
+#     canvas.create_window(250, 300, window=logtextbox)
