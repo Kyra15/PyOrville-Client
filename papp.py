@@ -33,9 +33,9 @@ def default():
     return render_template('indexvid.html')
 
 
-@app.route("/video", methods=['POST'])
-def video():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route("/video", methods=['POST'])
+# def video():
+#     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 # this is the endpoint for the API, it gets a json file of the data from the html page and sets all the data from the 'button' key to a variable
